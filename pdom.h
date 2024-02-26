@@ -397,7 +397,7 @@ int pdom_getTag(pdom_Parser *p, pdom_Tag *tag)
 		if (strcmp(tag->tag, etag->tag) == 0)
 			break;
 	}
-
+	free(etag);
 	return 1;
 }
 
@@ -407,7 +407,7 @@ zval *pdom_parse(pdom_Parser *p, pdom_Tag *parent)
 	zval *tags = (zval*)malloc(sizeof(zval));
 	array_init(tags);
 
-	pdom_Tag *stag = malloc(sizeof(pdom_Tag));
+	//pdom_Tag *stag = malloc(sizeof(pdom_Tag));
 	int eq = 0;
 	int it = 0;
 
@@ -429,10 +429,8 @@ zval *pdom_parse(pdom_Parser *p, pdom_Tag *parent)
 		tag->parent = 0;
 		int st = pdom_getTag(p, tag);
 	
-
 		if ( !st )
 			break;
-
 
 		if (tag->isEnd && strcmp(parent->tag, tag->tag) == 0)
 			break;
@@ -459,9 +457,11 @@ zval *pdom_parse(pdom_Parser *p, pdom_Tag *parent)
 
 			add_next_index_zval(tags, arrTag);
 
+
 		}
 
-		stag = tag;
+		//stag = tag;
+		free(tag);
 	}
 
 	return tags;
