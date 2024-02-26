@@ -52,4 +52,7 @@ PHP_FUNCTION(pdom)
 	array_init(return_value);
 	add_assoc_zval(return_value, "document", document->childrens );
 
+	free(document);
+	free(p);
+
 }
