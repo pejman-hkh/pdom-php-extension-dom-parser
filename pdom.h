@@ -349,18 +349,21 @@ int pdom_getTag(pdom_Parser *p, pdom_Tag *tag)
 		return 1;
 	}
 
-	char *substr = malloc(sizeof(char)*5);
-	for( int i = 0; i < 4; i++) {
-		substr[i] = tag->tag[i];
-	}
-	substr[4] = '\0';
-
-	if (strcmp(substr, "?xml") == 0)
+	if ( tag->tag[0] == '?')
 	{
-		p->isXml = 1;
-		return 1;
-	}
+		char *substr = malloc(sizeof(char)*5);
+		for( int i = 0; i < 4; i++) {
+			substr[i] = tag->tag[i];
+		}
+		substr[4] = '\0';
 
+		if( strcmp(substr, "?xml") == 0 ) {
+			free(substr);
+			p->isXml = 1;
+			return 1;
+		}
+		free(substr);
+	}
 	if (p->isXml)
 		hasNoEndTags[11] = "";
 
