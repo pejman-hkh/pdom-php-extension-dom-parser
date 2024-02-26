@@ -47,96 +47,80 @@ char *hasNoEndTags[17] = {"comment", "php", "empty", "!DOCTYPE", "area", "base",
 
 zval *pdom_parseAttr(pdom_Parser *p)
 {
+
 	zval *attrs = (zval*)malloc(sizeof(zval));
 	array_init(attrs);
-
-	char *attr = malloc(sizeof(char));
-	char *nowAttr = malloc(sizeof(char));
-	char c1;
 	int i = 0;
-	size_t size = 0, len = 0;
 	while (1)
 	{
-		char c1 = *p->html++;
-		if(  c1 == '\0' && c1 != '0' )
-			break;
-		
 
-		if (c1 == ' ')
-		{
-			len = 0, size = 0;
-			attr = malloc(sizeof(char));
-			continue;
+		size_t size1 = 0, len1 = 0;
+		char *name = malloc( sizeof( char ));
+		char is_there_value = 0;
+		while( 1 ) {
+			char c1 = *p->html++;
+			if( c1 == ' ' || c1 == '>' || c1 == '=' || (c1 == '\0' && c1 != '0') ) {
+				if( c1 == '=' )
+					is_there_value = 1;
+				
+				if( c1 == '>' )
+					p->html--;
+				break;
+			}
+
+			if (len1 + 1 >= size1)
+			{
+				size1 = size1 * 2 + 1;
+				name = realloc(name, sizeof(char) * size1);
+			}
+			name[len1++] = c1;
 		}
+		name[len1] = '\0';
 
-		char t = 0;
-		if (c1 == '=')
-		{
-			attr[len] = '\0';
-			nowAttr = malloc(strlen(attr));
-			nowAttr = attr;
 
-			attr = malloc(sizeof(char));
-			len = 0, size = 0;
+		char *value = malloc( sizeof( char ) );
+		size1 = 0, len1 = 0;
+		if( is_there_value ) {
 			char g = *p->html;
+			char t = 0;
 			if (g == '"' || g == '\'')
 			{
 				t = g;
 				p->html++;
 			}
 
-			char *value = malloc(sizeof(char));
-			char c2;
-			size_t size1 = 0, len1 = 0;
-			while (1)
-			{
-
-				char c2 = *p->html++;
-				if(  c2 == '\0' && c2 != '0' )
+			while( 1 ) {
+				char c1 = *p->html++;
+				if (c1 == t || (c1 == '\0' && c1 != '0'))
 					break;
-		
 
-				if (!t && c2 == ' ')
+				if( !t && c1 == ' ')
 					break;
-				
 
-				if (!t && c2 == '>')
+				if (!t && c1 == '>')
 				{
 					p->html--;
 					break;
 				}
-
-				if (c2 == t)
-					break;
 
 				if (len1 + 1 >= size1)
 				{
 					size1 = size1 * 2 + 1;
 					value = realloc(value, sizeof(char) * size1);
 				}
-
-				value[len1++] = c2;
+	
+				value[len1++] = c1;
 			}
-			value[len1] = '\0';
+		}
+		value[len1] = '\0';
 
-			add_assoc_string(attrs, nowAttr, value);
-			len = 0, size = 0;
-			attr = malloc(sizeof(char));
+		if( *name != '/' && *name != '\0' && *name != ' ' ) {
+			add_assoc_string(attrs, name, value);
 		}
 
-		if (!t && c1 == '=')
-			continue;
-
-		if (c1 == '>')
+		char c1 = *p->html++;
+		if ( c1 == '>' || (c1 == '\0' && c1 != '0') )
 			break;
-		
-		if (len + 1 >= size)
-		{
-			size = size * 2 + 1;
-			attr = realloc(attr, sizeof(char) * size);
-		}
-
-		attr[len++] = c1;
 	}
 
 	return attrs;
